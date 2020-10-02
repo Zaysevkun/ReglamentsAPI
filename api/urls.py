@@ -10,8 +10,6 @@ from rest_framework.authtoken.views import obtain_auth_token
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
-router.register(r'formfields', views.FormFieldViewSet)
-router.register(r'forms', views.FormBodyViewSet)
 
 
 urlpatterns = [

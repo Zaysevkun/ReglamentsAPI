@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from api.models import FormField, FormBody
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -15,13 +14,3 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'name']
 
 
-class FormFieldSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = FormField
-        fields = ['title', 'type', 'data', 'details', 'required']
-
-
-class FormBodySerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = FormBody
-        fields = ['title', 'type', 'details', 'form_fields']

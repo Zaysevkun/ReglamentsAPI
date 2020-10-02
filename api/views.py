@@ -1,9 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User, Group
-from api.models import FormField, FormBody
 from rest_framework import viewsets
 from rest_framework import permissions
-from api.serializers import UserSerializer, GroupSerializer, FormFieldSerializer, FormBodySerializer
+from api.serializers import UserSerializer, GroupSerializer
 
 
 # Create your views here.
@@ -30,16 +29,5 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-
-class FormFieldViewSet(viewsets.ModelViewSet):
-    queryset = FormField.objects.all()
-    serializer_class = FormFieldSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class FormBodyViewSet(viewsets.ModelViewSet):
-    queryset = FormBody.objects.all()
-    serializer_class = FormBodySerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 

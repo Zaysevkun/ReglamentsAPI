@@ -102,6 +102,11 @@ REST_FRAMEWORK = {
 }
 
 
+JWT_AUTH = {
+    'JWT_VERIFY_EXPIRATION': False,
+}
+
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
