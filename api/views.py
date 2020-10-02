@@ -8,6 +8,11 @@ from api.serializers import UserSerializer, GroupSerializer, FormFieldSerializer
 
 # Create your views here.
 
+
+def index(request):
+    return render(request, 'index.html')
+
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -36,3 +41,5 @@ class FormBodyViewSet(viewsets.ModelViewSet):
     queryset = FormBody.objects.all()
     serializer_class = FormBodySerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
