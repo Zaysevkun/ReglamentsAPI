@@ -57,7 +57,10 @@ div { font-family: arial; }
         dest=result_file, encoding='UTF-8')
     result_file = io.open(output_filename, encoding="utf-8")
     result_file.close()
-    return HttpResponse(pisa_status.err)
+    response = HttpResponse(result_file.read())
+    response['Content-Type'] = 'mimetype/submimetype'
+    response['Content-Disposition'] = 'attachment; filename=contract.pdf'
+    return response
 
 
 class CustomAuthToken(ObtainAuthToken):
