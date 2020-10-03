@@ -106,6 +106,7 @@ JWT_AUTH = {
     'JWT_VERIFY_EXPIRATION': False,
 }
 
+AUTH_USER_MODEL = 'api.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

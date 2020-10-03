@@ -1,14 +1,14 @@
-from django.http import JsonResponse
+from django.contrib.auth.models import Group
 from django.shortcuts import render
-from django.contrib.auth.models import User, Group
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-
-from api.models import UserExtended
-from rest_framework import viewsets
 from rest_framework import permissions
+from rest_framework import viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from api.serializers import UserExtendedSerializer, GroupSerializer
+from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
+
+from api.models import User, Department
+from api.serializers import UsersSerializer, GroupSerializer, DepartmentSerializer
 
 
 # Create your views here.
@@ -38,17 +38,18 @@ class CustomAuthToken(ObtainAuthToken):
         })
 
 
+class DepartmentViewSet(ReadOnlyModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = UserExtended.objects.all().order_by('-middle_name')
-    serializer_class = UserExtendedSerializer
+    queryset = User.objects.all().order_by('-last_name')
+    serializer_class = UsersSerializer
     permission_classes = [permissions.IsAuthenticated]
-
-    # def get_queryset(self):
-    #     username = self.request.query_params.get('username')
-    #     queryset = User.objects.filter()
 
 
 class GroupViewSet(viewsets.ModelViewSet):

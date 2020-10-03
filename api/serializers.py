@@ -1,26 +1,27 @@
-from django.contrib.auth.models import User, Group
-from api.models import UserExtended
+from django.contrib.auth.models import Group
+from api.models import User, Department
 from rest_framework import serializers
 
 
-class UserExtendedSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
-    email = serializers.CharField(source='user.email')
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ('id', 'name')
+
+
+class UsersSerializer(serializers.ModelSerializer):
+    department = DepartmentSerializer(read_only=True)
+    department_id = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), write_only=True,
+    )
 
     class Meta:
-        model = UserExtended
-        fields = ['username', 'email', 'phone_number', 'position',
-                  'first_name', 'middle_name', 'last_name']
-
-    def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        user = User.objects.create(**user_data)
-
-        profile = UserExtended.objects.create(user=user, **validated_data)
-        return profile
+        model = User
+        fields = ('id', 'username', 'email', 'phone_number', 'position', 'department',
+                  'department_id', 'first_name', 'patronymic_name', 'last_name', 'is_deleted')
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Group
-        fields = ['url', 'name']
+        fields = ('url', 'name')
