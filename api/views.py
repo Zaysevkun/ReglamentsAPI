@@ -3,6 +3,7 @@ import os
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions, status
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
@@ -111,9 +112,11 @@ class RevisionsViewSet(mixins.CreateModelMixin,
                        mixins.UpdateModelMixin,
                        mixins.ListModelMixin,
                        GenericViewSet):
+    filter_backends = [DjangoFilterBackend]
     queryset = Revisions.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RevisionsSerializer
+    filterset_fields = ['regulations_id', 'created_by']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, many=True)
@@ -125,5 +128,7 @@ class RevisionsViewSet(mixins.CreateModelMixin,
 
 class ApplicationsViewSet(viewsets.ModelViewSet):
     queryset = Applications.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['regulations_id']
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = ApplicationsSerializer

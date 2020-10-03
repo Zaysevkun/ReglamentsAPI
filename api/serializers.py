@@ -2,6 +2,7 @@ from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
 from api.consts import TEXT1_LABEL, TEXT2_LABEL, TEXT3_LABEL, TEXT4_LABEL, TEXT5_LABEL
+from api.helpers import send_mail_to_department_users
 from api.models import Department, Regulations, AdditionalUserInfo, Revisions, Applications
 
 
@@ -54,10 +55,11 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
 
 class DepartmentsUsersSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Department
-        fields = ('name', 'user')
+        fields = ('name', 'user', 'status')
 
     @staticmethod
     def get_user(obj):
@@ -66,6 +68,15 @@ class DepartmentsUsersSerializer(serializers.ModelSerializer):
             return UserInfoSerializer(user_info.first().user).data
         else:
             return {}
+
+    def get_status(self, obj):
+        regulations = Regulations.objects.get(id=self.context['regulations_id'])
+        user = obj.users.all().first()
+        if user.id in list(regulations.approved.all().values_list('id', flat=True)):
+            return "Согласовано"
+        if Revisions.objects.filter(regulations_id=regulations.id, created_by=user.id):
+            return "Ошибка"
+        return "Ожидает согласования"
 
 
 class RevisionsSerializer(serializers.ModelSerializer):
@@ -243,7 +254,8 @@ class RegulationsSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_departments_users(obj):
-        return DepartmentsUsersSerializer(obj.departments.all(), many=True).data
+        return DepartmentsUsersSerializer(obj.departments.all(), many=True,
+                                          context={'regulations_id': obj.id}).data
 
     def get_application_urls(self, obj):
         request = self.context.get('request')
