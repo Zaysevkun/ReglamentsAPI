@@ -1,5 +1,4 @@
 import os
-import io
 
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
@@ -12,9 +11,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from xhtml2pdf import pisa
 
-from ReglamentsAPI.settings import PROJECT_ROOT
 from api.models import Department, Regulations
-from api.serializers import UserInfoSerializer, GroupSerializer, DepartmentSerializer
+from api.serializers import (UserInfoSerializer, GroupSerializer, DepartmentSerializer,
+                             RegulationsSerializer)
 
 
 # Create your views here.
@@ -28,7 +27,6 @@ pisa.showLogging()
 
 
 def dumpErrors(pdf, showLog=True):
-
     if pdf.err:
         print(pdf.err)
 
@@ -37,7 +35,8 @@ def html_to_pdf(request):
     # regulation_id = request.GET.get('id')
     # regulation = Regulations.objects.get(pk=regulation_id)
     regulation = """Hello <b>World</b><br/>"""
-    output_filename = os.path.join('/home/zaysevkun/PycharmProjects/ReglamentsAPI(old)', 'pdfs/regulation.pdf')
+    output_filename = os.path.join('/home/zaysevkun/PycharmProjects/ReglamentsAPI(old)',
+                                   'pdfs/regulation.pdf')
     result_file = open(output_filename, "w+b")
 
     pisa_status = pisa.CreatePDF(
@@ -82,3 +81,9 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class RegulationsViewSet(viewsets.ModelViewSet):
+    queryset = Regulations.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RegulationsSerializer

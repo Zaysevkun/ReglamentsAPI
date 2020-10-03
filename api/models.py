@@ -39,8 +39,14 @@ class AdditionalUserInfo(models.Model):
 
 class Regulations(Statuses):
     name = models.CharField('Название регламента', max_length=255, default='')
+
     label = models.TextField('Заголовок', default='')
-    text = models.TextField('Текст регламента')
+    text1 = models.TextField('Текст 1 раздела', default='')
+    text2 = models.TextField('Текст 2 раздела', default='')
+    text3 = models.TextField('Текст 3 раздела', default='')
+    text4 = models.TextField('Текст 4 раздела', default='')
+    text5 = models.TextField('Текст 5 раздела', default='')
+
     version = models.PositiveSmallIntegerField('Версия регламентов', blank=True, null=True)
     version_history_id = models.PositiveBigIntegerField('Номер истории',
                                                         null=True, blank=True, default=None)
@@ -71,11 +77,22 @@ class Regulations(Statuses):
 
 
 class Revisions(Statuses):
+    REGULATIONS_PART_CHOICES = [
+        ('text1', 'text1'),
+        ('text2', 'text2'),
+        ('text3', 'text3'),
+        ('text4', 'text4'),
+        ('text5', 'text5'),
+        ('label', 'label')
+    ]
     report = models.TextField('Сообщение по правке')
     paragraph = models.CharField('Абзац для правки', max_length=32)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE,
                                    verbose_name='Кем создана', null=True)
     regulations = models.ForeignKey(Regulations, models.CASCADE, verbose_name='Регламент')
+    regulation_part = models.CharField(max_length=32,
+                                       choices=REGULATIONS_PART_CHOICES,
+                                       default='text1')
 
     class Meta:
         verbose_name = 'Правка'
