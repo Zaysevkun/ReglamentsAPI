@@ -38,20 +38,7 @@ def html_to_pdf(request):
     regulation_id = request.GET.get('id')
     regulation = Regulations.objects.get(pk=regulation_id)
     regulation_full = regulation.combine()
-    font_path = os.path.join(STATIC_ROOT, 'pdf/fonts/Helvetica.ttf')
-    html_head = """<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<title>Моя первая страничка</title>
-<style type="text/css">
-@font-face {
-font-family: Helvetica;
-src: url(' """ + font_path + """ ');
-}
-body { font-family: Helvetica; }
-</style>"""
-    regulation_full1 = html_head + regulation_full
-    output_filename = os.path.join(STATIC_ROOT,
-                                   'pdf/regulation.pdf')
-    result_file = open(output_filename, "w+b")
+    output_filename = os.path.join(STATIC_ROOT, 'pdf/regulation.pdf')
     HTML(string=regulation_full).write_pdf(output_filename)
     with open(output_filename, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read())
