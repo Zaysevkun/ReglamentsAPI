@@ -19,7 +19,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
     phone_number = serializers.CharField(source='info.phone_number')
     patronymic_name = serializers.CharField(source='info.patronymic_name', required=False)
-    is_deleted = serializers.CharField(source='info.is_deleted', required=False)
+    is_deleted = serializers.BooleanField(source='info.is_deleted', required=False)
 
     class Meta:
         model = User

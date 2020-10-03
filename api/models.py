@@ -30,6 +30,8 @@ class AdditionalUserInfo(models.Model):
                                 blank=True, null=True)
     department = models.ForeignKey(Department, models.CASCADE, 'users', blank=True,
                                    null=True, verbose_name='Департамент')
+    allow_send_info_emails = models.BooleanField('Позволять присылать информационные емейлы',
+                                                 default=False)
     phone_number = models.CharField('Номер телефона', max_length=30)
     patronymic_name = models.CharField('Отчество', max_length=50, blank=True, null=True)
     is_deleted = models.BooleanField('Удален ли пользователь', default=False)
@@ -68,7 +70,7 @@ class Regulations(Statuses):
     @property
     def status(self):
         departments = self.departments.all()
-        if not departments:
+        if not departments.count():
             return "Создание"
         revisions = self.revisions.all().filter(is_marked_solved=False)
         if revisions:
