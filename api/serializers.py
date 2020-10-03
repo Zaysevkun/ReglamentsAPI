@@ -171,16 +171,21 @@ class Text5Serializer(serializers.ModelSerializer):
 
 
 class LabelSerializer(serializers.ModelSerializer):
+    text = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Regulations
-        fields = ('label', 'comments')
+        fields = ('text', 'comments')
 
     @staticmethod
     def get_comments(obj):
         return RevisionsSerializer(obj.revisions.all().filter(regulation_part='label'),
                                    many=True).data
+
+    @staticmethod
+    def get_text(obj):
+        return obj.label
 
 
 class PartsSerializer(serializers.ModelSerializer):
@@ -238,8 +243,10 @@ class RegulationsSerializer(serializers.ModelSerializer):
         return Regulations.objects.get(id=regulations.id)
 
     def update(self, instance, validated_data):
-        validated_data['updated_by'] = self.context['request'].user
-        return super().validated_data(instance, validated_data)
+        regulations = super().update(instance, validated_data)
+        regulations.updated_by = self.context['request'].user
+        regulations.save()
+        return Regulations.objects.get(id=regulations.id)
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
