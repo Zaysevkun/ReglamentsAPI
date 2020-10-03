@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
-from api.models import Department, Regulations, AdditionalUserInfo
+from api.models import Department, Regulations, AdditionalUserInfo, Revisions
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
