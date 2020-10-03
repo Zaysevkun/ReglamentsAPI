@@ -64,11 +64,15 @@ class DepartmentsUsersSerializer(serializers.ModelSerializer):
 
 class RevisionsSerializer(serializers.ModelSerializer):
     created_by = UserInfoSerializer(read_only=True)
+    regulations_id = serializers.IntegerField()
 
     class Meta:
         model = Revisions
-        fields = ('id', 'report', 'paragraph', 'paragraph',
-                  'created_by', 'regulation_part', 'created_at')
+        fields = ('id', 'report', 'regulations_id', 'created_by', 'regulation_part', 'created_at')
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class Text1Serializer(serializers.ModelSerializer):
@@ -205,12 +209,19 @@ class RegulationsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Regulations
-        fields = ('name', 'label', 'version', 'version_history_id', 'departments',
+        fields = ('id', 'name', 'version', 'version_history_id', 'departments',
                   'department_id', 'created_at', 'updated_at', 'status', 'created_by', 'updated_by',
-                  'approved', 'departments_users', 'parts')
+                  'approved', 'departments_users', 'parts',
+                  'text1', 'text2', 'text3', 'text4', 'text5', 'label')
         extra_kwargs = {
             'version': {'read_only': True},
-            'version_history_id': {'read_only': True}
+            'version_history_id': {'read_only': True},
+            'text1': {'write_only': True},
+            'text2': {'write_only': True},
+            'text3': {'write_only': True},
+            'text4': {'write_only': True},
+            'text5': {'write_only': True},
+            'label': {'write_only': True},
         }
 
     @staticmethod

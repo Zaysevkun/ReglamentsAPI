@@ -72,8 +72,6 @@ class Regulations(Statuses):
         approved = self.approved.all()
         if not approved and not revisions:
             return "На согласовании"
-        if len(approved) == len(self.departments):
-            return "Согласовано"
 
 
 class Revisions(Statuses):
@@ -86,7 +84,6 @@ class Revisions(Statuses):
         ('label', 'label')
     ]
     report = models.TextField('Сообщение по правке')
-    paragraph = models.CharField('Абзац для правки', max_length=32)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE,
                                    verbose_name='Кем создана', null=True)
     regulations = models.ForeignKey(Regulations, models.CASCADE, verbose_name='Регламент')

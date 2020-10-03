@@ -11,9 +11,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from xhtml2pdf import pisa
 
-from api.models import Department, Regulations
+from api.models import Department, Regulations, Revisions
 from api.serializers import (UserInfoSerializer, GroupSerializer, DepartmentSerializer,
-                             RegulationsSerializer)
+                             RegulationsSerializer, RevisionsSerializer)
 
 
 # Create your views here.
@@ -87,3 +87,19 @@ class RegulationsViewSet(viewsets.ModelViewSet):
     queryset = Regulations.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RegulationsSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        regulation = self.get_object()
+        version_history_id = regulation.version_history_id
+        if not version_history_id:
+            serializer_data = [self.get_serializer(regulation).data]
+        else:
+            regulations = self.queryset.filter(version_history_id=version_history_id)
+            serializer_data = self.get_serializer(regulations, many=True).data
+        return Response(serializer_data)
+
+
+class RevisionsViewSet(viewsets.ModelViewSet):
+    queryset = Revisions.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = RevisionsSerializer
