@@ -1,5 +1,6 @@
 import os
 import io
+from weasyprint import HTML
 
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
@@ -37,29 +38,26 @@ def html_to_pdf(request):
     regulation_id = request.GET.get('id')
     regulation = Regulations.objects.get(pk=regulation_id)
     regulation_full = regulation.combine()
-    font_path = os.path.join(STATIC_ROOT, 'pdf/fonts/times-new-roman.ttf')
-    html_head = """meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    font_path = os.path.join(STATIC_ROOT, 'pdf/fonts/Helvetica.ttf')
+    html_head = """<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Моя первая страничка</title>
 <style type="text/css">
 @font-face {
-font-family: Arial;
-src: url(""" + font_path + """);
+font-family: Helvetica;
+src: url(' """ + font_path + """ ');
 }
-div { font-family: arial; }
+body { font-family: Helvetica; }
 </style>"""
-    regulation_full = html_head + regulation_full
+    regulation_full1 = html_head + regulation_full
     output_filename = os.path.join(STATIC_ROOT,
                                    'pdf/regulation.pdf')
     result_file = open(output_filename, "w+b")
-
-    pisa_status = pisa.CreatePDF(
-        regulation_full.encode("UTF-8"),
-        dest=result_file, encoding='UTF-8')
-    result_file = io.open(output_filename, encoding="utf-8")
-    response = HttpResponse(result_file.read())
-    response['Content-Type'] = 'mimetype/submimetype'
-    response['Content-Disposition'] = 'attachment; filename=contract.pdf'
-    result_file.close()
+    HTML(string=regulation_full).write_pdf(output_filename)
+    with open(output_filename, 'rb') as pdf_file:
+        response = HttpResponse(pdf_file.read())
+        os.remove(pdf_file.name)
+        response['Content-Type'] = 'mimetype/submimetype'
+        response['Content-Disposition'] = 'attachment; filename=regulation.pdf'
     return response
 
 
