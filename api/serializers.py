@@ -198,32 +198,49 @@ class PartsSerializer(serializers.ModelSerializer):
 
 class RegulationsSerializer(serializers.ModelSerializer):
     approved = UserInfoSerializer(many=True, read_only=True)
+    do_approve = serializers.BooleanField(write_only=True)
     created_by = UserInfoSerializer(read_only=True)
     updated_by = UserInfoSerializer(read_only=True)
     status = serializers.CharField(read_only=True)
     departments_users = serializers.SerializerMethodField()
-    department_id = serializers.PrimaryKeyRelatedField(
-        required=True, source='departments', write_only=True,
-        queryset=Department.objects.all())
     parts = PartsSerializer(read_only=True, source='*')
 
     class Meta:
         model = Regulations
         fields = ('id', 'name', 'version', 'version_history_id', 'departments',
-                  'department_id', 'created_at', 'updated_at', 'status', 'created_by', 'updated_by',
-                  'approved', 'departments_users', 'parts',
+                  'created_at', 'updated_at', 'status', 'created_by', 'updated_by',
+                  'approved', 'departments_users', 'parts', 'do_approve',
                   'text1', 'text2', 'text3', 'text4', 'text5', 'label')
         extra_kwargs = {
             'version': {'read_only': True},
+            'created_at': {'read_only': True},
+            'updated_at': {'read_only': True},
+            'departments': {'read_only': True},
             'version_history_id': {'read_only': True},
             'text1': {'write_only': True},
             'text2': {'write_only': True},
             'text3': {'write_only': True},
             'text4': {'write_only': True},
             'text5': {'write_only': True},
-            'label': {'write_only': True},
+            'label': {'write_only': True}
         }
 
     @staticmethod
     def get_departments_users(obj):
         return DepartmentsUsersSerializer(obj.departments.all(), many=True).data
+
+    def save(self, **kwargs):
+        do_approve = self.validated_data.pop('do_approve', False)
+        regulations = super().save(**kwargs)
+        if do_approve:
+            regulations.departments.add(
+                *list(Department.objects.all().values_list('id', flat=True)))
+        return Regulations.objects.get(id=regulations.id)
+
+    def update(self, instance, validated_data):
+        validated_data['updated_by'] = self.context['request'].user
+        return super().validated_data(instance, validated_data)
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)

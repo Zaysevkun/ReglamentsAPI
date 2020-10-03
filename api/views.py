@@ -94,7 +94,9 @@ class RegulationsViewSet(viewsets.ModelViewSet):
         if not version_history_id:
             serializer_data = [self.get_serializer(regulation).data]
         else:
-            regulations = self.queryset.filter(version_history_id=version_history_id)
+            regulations = (self.queryset
+                           .filter(version_history_id=version_history_id)
+                           .order_by('-created_at'))
             serializer_data = self.get_serializer(regulations, many=True).data
         return Response(serializer_data)
 

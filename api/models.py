@@ -66,12 +66,18 @@ class Regulations(Statuses):
 
     @property
     def status(self):
+        departments = self.departments.all()
+        if not departments:
+            return "Создание"
         revisions = self.revisions.all()
         if revisions:
             return "Ошибка"
         approved = self.approved.all()
-        if not approved and not revisions:
+        if not approved:
             return "На согласовании"
+        if approved.count() < departments.count():
+            return "Согласование"
+        return "В работе"
 
 
 class Revisions(Statuses):
