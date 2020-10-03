@@ -13,9 +13,9 @@ from weasyprint import HTML
 from xhtml2pdf import pisa
 
 from ReglamentsAPI.settings import STATIC_ROOT
-from api.models import Department, Regulations, Revisions
+from api.models import Department, Regulations, Revisions, Applications
 from api.serializers import (UserInfoSerializer, GroupSerializer, DepartmentSerializer,
-                             RegulationsSerializer, RevisionsSerializer)
+                             RegulationsSerializer, RevisionsSerializer, ApplicationsSerializer)
 
 
 # Create your views here.
@@ -114,3 +114,9 @@ class RevisionsViewSet(mixins.CreateModelMixin,
     queryset = Revisions.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RevisionsSerializer
+
+
+class ApplicationsViewSet(viewsets.ModelViewSet):
+    queryset = Applications.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ApplicationsSerializer

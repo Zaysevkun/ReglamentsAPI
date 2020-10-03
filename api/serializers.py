@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group, User
 from rest_framework import serializers
 
 from api.consts import TEXT1_LABEL, TEXT2_LABEL, TEXT3_LABEL, TEXT4_LABEL, TEXT5_LABEL
-from api.models import Department, Regulations, AdditionalUserInfo, Revisions
+from api.models import Department, Regulations, AdditionalUserInfo, Revisions, Applications
 
 
 class DepartmentSerializer(serializers.ModelSerializer):
@@ -295,3 +295,12 @@ class RegulationsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)
+
+
+class ApplicationsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Applications
+        fields = ('id', 'api_file', 'regulations')
+
+

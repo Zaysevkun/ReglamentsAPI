@@ -129,3 +129,13 @@ class Revisions(Statuses):
         verbose_name = 'Правка'
         verbose_name_plural = 'Правки'
         default_related_name = 'revisions'
+
+
+class Applications(models.Model):
+    app_file = models.FileField('файл приложения', max_length=5000)
+    regulations = models.ForeignKey(Regulations, verbose_name='Регламент')
+
+    class Meta:
+        verbose_name = 'Приложение'
+        verbose_name_plural = 'Приложения'
+        default_related_name = 'applications'
