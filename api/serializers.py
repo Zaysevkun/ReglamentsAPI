@@ -8,7 +8,7 @@ from api.models import Department, Regulations, AdditionalUserInfo, Revisions
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'is_regulator')
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -68,7 +68,9 @@ class RevisionsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Revisions
-        fields = ('id', 'report', 'regulations_id', 'created_by', 'regulation_part', 'created_at')
+        fields = ('id', 'report', 'regulations_id', 'created_by',
+                  'regulation_part', 'created_at', 'html_selection',
+                  'is_marked_solved')
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
@@ -218,10 +220,10 @@ class RegulationsSerializer(serializers.ModelSerializer):
                   'text1', 'text2', 'text3', 'text4', 'text5', 'label')
         extra_kwargs = {
             'version': {'read_only': True},
+            'version_history_id': {'read_only': True},
             'created_at': {'read_only': True},
             'updated_at': {'read_only': True},
             'departments': {'read_only': True},
-            'version_history_id': {'read_only': True},
             'text1': {'write_only': True},
             'text2': {'write_only': True},
             'text3': {'write_only': True},
