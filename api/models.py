@@ -90,6 +90,21 @@ class Regulations(Statuses):
         regulation = label + text1 + text2 + text3 + text4 + text5
         return regulation
 
+    def identify_version(self, previous_history_id=None, previous_version=None):
+        with transaction.atomic():
+            if not previous_history_id:
+                last_version_history_id = Regulations.objects.aggregate(
+                    Max('version_history_id'))['version_history_id__max']
+                if not last_version_history_id:
+                    self.version_history_id = 1
+                else:
+                    self.version_history_id = last_version_history_id + 1
+                self.version = 1
+            elif previous_history_id and previous_version:
+                self.version_history_id = previous_history_id + 1
+                self.version = previous_version + 1
+            self.save()
+
 
 class Revisions(Statuses):
     REGULATIONS_PART_CHOICES = [
