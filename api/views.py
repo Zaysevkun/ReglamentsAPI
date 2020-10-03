@@ -41,7 +41,7 @@ def html_to_pdf(request):
     HTML(string=regulation_full).write_pdf(output_filename)
     with open(output_filename, 'rb') as pdf_file:
         response = HttpResponse(pdf_file.read())
-        os.remove(pdf_file.name)
+        # os.remove(pdf_file.name)
         response['Content-Type'] = 'mimetype/submimetype'
         response['Content-Disposition'] = 'attachment; filename=regulation.pdf'
     return response
