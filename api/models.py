@@ -39,25 +39,35 @@ class AdditionalUserInfo(models.Model):
 
 class Regulations(Statuses):
     name = models.CharField('Название регламента', max_length=255, default='')
+    label = models.TextField('Заголовок', default='')
     text = models.TextField('Текст регламента')
-    version = models.PositiveSmallIntegerField('Версия регламентов')
+    version = models.PositiveSmallIntegerField('Версия регламентов', blank=True, null=True)
+    version_history_id = models.PositiveBigIntegerField('Номер истории',
+                                                        null=True, blank=True, default=None)
     departments = models.ManyToManyField(Department, verbose_name='Департаменты')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, 'created_regulations',
-                                   verbose_name='Кем создана', null=True)
+                                   verbose_name='Кем создана', blank=True, null=True)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE, 'updated_regulations',
-                                   verbose_name='Кем обновлена', null=True)
+                                   verbose_name='Кем обновлена', blank=True, null=True)
     approved = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Одобрившие регламент',
-                                      related_name='approved')
+                                      related_name='approved', blank=True)
 
     class Meta:
+        ordering = ['-created_at']
         verbose_name = 'Регламент'
         verbose_name_plural = 'Регламенты'
         default_related_name = 'regulations'
 
     @property
     def status(self):
-        if self.revisions.all():
+        revisions = self.revisions.all()
+        if revisions:
             return "Ошибка"
+        approved = self.approved.all()
+        if not approved and not revisions:
+            return "На согласовании"
+        if len(approved) == len(self.departments):
+            return "Согласовано"
 
 
 class Revisions(Statuses):

@@ -45,7 +45,38 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'name')
 
 
+class DepartmentsUsersSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Department
+        fields = ('name', 'user')
+
+    @staticmethod
+    def get_user(obj):
+        return UserInfoSerializer(obj.users.all()[0].user).data
+
+
 class RegulationsSerializer(serializers.ModelSerializer):
+    approved = UserInfoSerializer(many=True, read_only=True)
+    created_by = UserInfoSerializer(read_only=True)
+    updated_by = UserInfoSerializer(read_only=True)
+    status = serializers.CharField(read_only=True)
+    departments_users = serializers.SerializerMethodField()
+    department_id = serializers.PrimaryKeyRelatedField(
+        required=True, source='departments', write_only=True,
+        queryset=Department.objects.all())
+
     class Meta:
         model = Regulations
-        field = ('name',)
+        fields = ('name', 'label', 'text', 'version', 'version_history_id', 'departments',
+                  'department_id', 'created_at', 'updated_at', 'status', 'created_by', 'updated_by',
+                  'approved', 'departments_users')
+        extra_kwargs = {
+            'version': {'read_only': True},
+            'version_history_id': {'read_only': True}
+        }
+
+    @staticmethod
+    def get_departments_users(obj):
+        return DepartmentsUsersSerializer(obj.departments.all(), many=True).data
