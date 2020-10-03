@@ -41,6 +41,7 @@ class CustomAuthToken(ObtainAuthToken):
 class DepartmentViewSet(ReadOnlyModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class UserViewSet(viewsets.ModelViewSet):
