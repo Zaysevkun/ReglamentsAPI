@@ -76,7 +76,7 @@ class RevisionsSerializer(serializers.ModelSerializer):
         model = Revisions
         fields = ('id', 'report', 'regulations_id', 'created_by',
                   'regulation_part', 'created_at', 'html_selection',
-                  'is_marked_solved')
+                  'is_marked_solved', 'secret_id')
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
@@ -216,6 +216,7 @@ class RegulationsSerializer(serializers.ModelSerializer):
     created_by = UserInfoSerializer(read_only=True)
     updated_by = UserInfoSerializer(read_only=True)
     status = serializers.CharField(read_only=True)
+    parts = PartsSerializer(read_only=True, source='*')
     departments_users = serializers.SerializerMethodField()
     parts = PartsSerializer(read_only=True, source='*')
 
@@ -301,6 +302,4 @@ class ApplicationsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Applications
-        fields = ('id', 'api_file', 'regulations')
-
-
+        fields = ('id', 'app_file', 'regulations')

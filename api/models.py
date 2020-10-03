@@ -116,6 +116,7 @@ class Revisions(Statuses):
         ('label', 'label')
     ]
     report = models.TextField('Сообщение по правке')
+    secret_id = models.PositiveSmallIntegerField(null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE,
                                    verbose_name='Кем создана', null=True)
     regulations = models.ForeignKey(Regulations, models.CASCADE, verbose_name='Регламент')
@@ -132,8 +133,8 @@ class Revisions(Statuses):
 
 
 class Applications(models.Model):
-    app_file = models.FileField('файл приложения', max_length=5000)
-    regulations = models.ForeignKey(Regulations, verbose_name='Регламент', on_delete=models.CASCADE)
+    app_file = models.FileField('Файл приложения', max_length=5000)
+    regulations = models.ForeignKey(Regulations, models.CASCADE, verbose_name='Регламент')
 
     class Meta:
         verbose_name = 'Приложение'
