@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 from django.db import models
 
 
@@ -19,12 +19,18 @@ class Department(models.Model):
         verbose_name = 'Департамент'
         verbose_name_plural = 'Департаменты'
 
+    def __str__(self):
+        return self.name
 
-class User(AbstractUser):
+
+class AdditionalUserInfo(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, models.CASCADE,
+                                related_name='info',
+                                blank=True, null=True)
     department = models.ForeignKey(Department, models.CASCADE, 'users', blank=True,
                                    null=True, verbose_name='Департамент')
     phone_number = models.CharField('Номер телефона', max_length=30)
-    patronymic_name = models.CharField('Отчество', max_length=50)
+    patronymic_name = models.CharField('Отчество', max_length=50, blank=True, null=True)
     is_deleted = models.BooleanField('Удален ли пользователь', default=False)
 
     def delete(self, *args, **kwargs):
