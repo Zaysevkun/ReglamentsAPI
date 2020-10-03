@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, User
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Max
 
 
 class Statuses(models.Model):
@@ -106,6 +107,8 @@ class Revisions(Statuses):
     regulation_part = models.CharField(max_length=32,
                                        choices=REGULATIONS_PART_CHOICES,
                                        default='text1')
+    html_selection = models.TextField('Выделенный текст для правки', blank=True, null=True)
+    is_marked_solved = models.BooleanField('Отмечен ли как решенный', default=False)
 
     class Meta:
         verbose_name = 'Правка'
