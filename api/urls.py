@@ -15,5 +15,6 @@ router.register(r'groups', views.GroupViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('auth/', obtain_auth_token, name='api_token_auth'),
+    path('auth/', views.CustomAuthToken.as_view()),
+    # path('whoami/', views.whoami)
 ]
