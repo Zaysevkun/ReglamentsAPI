@@ -243,8 +243,10 @@ class RegulationsSerializer(serializers.ModelSerializer):
         return Regulations.objects.get(id=regulations.id)
 
     def update(self, instance, validated_data):
-        validated_data['updated_by'] = self.context['request'].user
-        return super().validated_data(instance, validated_data)
+        regulations = super().update(instance, validated_data)
+        regulations.updated_by = self.context['request'].user
+        regulations.save()
+        return Regulations.objects.get(id=regulations.id)
 
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
