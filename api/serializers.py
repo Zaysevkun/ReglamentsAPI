@@ -171,16 +171,21 @@ class Text5Serializer(serializers.ModelSerializer):
 
 
 class LabelSerializer(serializers.ModelSerializer):
+    text = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Regulations
-        fields = ('label', 'comments')
+        fields = ('text', 'comments')
 
     @staticmethod
     def get_comments(obj):
         return RevisionsSerializer(obj.revisions.all().filter(regulation_part='label'),
                                    many=True).data
+
+    @staticmethod
+    def get_text(obj):
+        return obj.label
 
 
 class PartsSerializer(serializers.ModelSerializer):
