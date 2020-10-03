@@ -48,7 +48,8 @@ class Regulations(Statuses):
     text4 = models.TextField('Текст 4 раздела', default='')
     text5 = models.TextField('Текст 5 раздела', default='')
 
-    version = models.PositiveSmallIntegerField('Версия регламентов', blank=True, null=True)
+    version = models.PositiveSmallIntegerField('Версия регламентов', blank=True, null=True,
+                                               default=None)
     version_history_id = models.PositiveBigIntegerField('Номер истории',
                                                         null=True, blank=True, default=None)
     departments = models.ManyToManyField(Department, verbose_name='Департаменты')
@@ -60,7 +61,6 @@ class Regulations(Statuses):
                                       related_name='approved', blank=True)
 
     class Meta:
-        ordering = ['-created_at']
         verbose_name = 'Регламент'
         verbose_name_plural = 'Регламенты'
         default_related_name = 'regulations'
@@ -70,14 +70,14 @@ class Regulations(Statuses):
         departments = self.departments.all()
         if not departments:
             return "Создание"
-        revisions = self.revisions.all()
+        revisions = self.revisions.all().filter(is_marked_solved=False)
         if revisions:
             return "Ошибка"
         approved = self.approved.all()
-        if not approved:
-            return "На согласовании"
         if approved.count() < departments.count():
-            return "Согласование"
+            return "На согласовании"
+        if not approved.count() < departments.count():
+            return "Согласован"
         return "В работе"
 
     def combine(self):
@@ -101,7 +101,7 @@ class Regulations(Statuses):
                     self.version_history_id = last_version_history_id + 1
                 self.version = 1
             elif previous_history_id and previous_version:
-                self.version_history_id = previous_history_id + 1
+                self.version_history_id = previous_history_id
                 self.version = previous_version + 1
             self.save()
 

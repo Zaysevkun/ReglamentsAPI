@@ -1,16 +1,15 @@
 import os
-import io
-from weasyprint import HTML
 
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
 from django.shortcuts import render
-from rest_framework import permissions
+from rest_framework import mixins, permissions
 from rest_framework import viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
+from weasyprint import HTML
 from xhtml2pdf import pisa
 
 from ReglamentsAPI.settings import STATIC_ROOT
@@ -85,7 +84,11 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class RegulationsViewSet(viewsets.ModelViewSet):
+class RegulationsViewSet(mixins.CreateModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.ListModelMixin,
+                         GenericViewSet):
     queryset = Regulations.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RegulationsSerializer
@@ -98,12 +101,16 @@ class RegulationsViewSet(viewsets.ModelViewSet):
         else:
             regulations = (self.queryset
                            .filter(version_history_id=version_history_id)
-                           .order_by('-created_at'))
+                           .order_by('-version'))
             serializer_data = self.get_serializer(regulations, many=True).data
         return Response(serializer_data)
 
 
-class RevisionsViewSet(viewsets.ModelViewSet):
+class RevisionsViewSet(mixins.CreateModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.UpdateModelMixin,
+                       mixins.ListModelMixin,
+                       GenericViewSet):
     queryset = Revisions.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RevisionsSerializer

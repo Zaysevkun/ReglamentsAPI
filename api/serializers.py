@@ -26,6 +26,12 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'password', 'email', 'phone_number', 'department',
                   'department_id', 'first_name', 'patronymic_name', 'last_name', 'is_deleted',
                   'is_superuser')
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'patronymic_name': {'required': True},
+            'email': {'required': True}
+        }
 
     def create(self, validated_data):
         info = validated_data.pop('info')
@@ -205,6 +211,7 @@ class PartsSerializer(serializers.ModelSerializer):
 
 class RegulationsSerializer(serializers.ModelSerializer):
     approved = UserInfoSerializer(many=True, read_only=True)
+    approver_id = serializers.IntegerField(write_only=True, required=False)
     do_approve = serializers.BooleanField(write_only=True)
     created_by = UserInfoSerializer(read_only=True)
     updated_by = UserInfoSerializer(read_only=True)
@@ -217,7 +224,8 @@ class RegulationsSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'version', 'version_history_id', 'departments',
                   'created_at', 'updated_at', 'status', 'created_by', 'updated_by',
                   'approved', 'departments_users', 'parts', 'do_approve',
-                  'text1', 'text2', 'text3', 'text4', 'text5', 'label')
+                  'text1', 'text2', 'text3', 'text4', 'text5', 'label',
+                  'approver_id')
         extra_kwargs = {
             'version': {'read_only': True},
             'version_history_id': {'read_only': True},
@@ -237,17 +245,51 @@ class RegulationsSerializer(serializers.ModelSerializer):
         return DepartmentsUsersSerializer(obj.departments.all(), many=True).data
 
     def save(self, **kwargs):
+        approver_id = self.validated_data.pop('approver_id', False)
         do_approve = self.validated_data.pop('do_approve', False)
         regulations = super().save(**kwargs)
         if do_approve:
             regulations.departments.add(
-                *list(Department.objects.all().values_list('id', flat=True)))
+                *list(Department.objects.filter(is_regulator=True).values_list('id', flat=True)))
+        if approver_id:
+            regulations.approved.add(approver_id)
         return Regulations.objects.get(id=regulations.id)
 
     def update(self, instance, validated_data):
+        is_new_version = bool({'text1', 'text2', 'text3', 'text4', 'text5', 'load'}
+                              .intersection(set(validated_data.keys())))
+        if is_new_version and instance.version_history_id:
+            regulations_history = Regulations.objects.filter(
+                version_history_id=instance.version_history_id
+            ).order_by('-version')
+            instance = regulations_history.first()
         regulations = super().update(instance, validated_data)
+        if is_new_version:
+            past_regulations = Regulations.objects.create(
+                name=instance.name,
+                label=instance.label,
+                text1=instance.text1,
+                text2=instance.text2,
+                text3=instance.text3,
+                text4=instance.text4,
+                text5=instance.text5,
+                created_by=instance.created_by,
+                updated_by=instance.updated_by
+            )
+            if instance.version_history_id and instance.version:
+                past_regulations.version_history_id = instance.version_history_id
+                past_regulations.version = instance.version
+            else:
+                past_regulations.identify_version(instance.version_history_id, instance.version)
+            updated_at = past_regulations.created_at
+            past_regulations.created_at = instance.created_at
+            past_regulations.updated_at = updated_at
+            past_regulations.save()
+            regulations.identify_version(past_regulations.version_history_id,
+                                         past_regulations.version)
         regulations.updated_by = self.context['request'].user
         regulations.save()
+
         return Regulations.objects.get(id=regulations.id)
 
     def create(self, validated_data):
