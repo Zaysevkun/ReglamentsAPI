@@ -1,4 +1,5 @@
 import os
+import io
 
 from django.contrib.auth.models import Group, User
 from django.http import HttpResponse
@@ -11,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from xhtml2pdf import pisa
 
+from ReglamentsAPI.settings import STATIC_ROOT
 from api.models import Department, Regulations, Revisions
 from api.serializers import (UserInfoSerializer, GroupSerializer, DepartmentSerializer,
                              RegulationsSerializer, RevisionsSerializer)
@@ -32,18 +34,30 @@ def dumpErrors(pdf, showLog=True):
 
 
 def html_to_pdf(request):
-    # regulation_id = request.GET.get('id')
-    # regulation = Regulations.objects.get(pk=regulation_id)
-    regulation = """Hello <b>World</b><br/>"""
-    output_filename = os.path.join('/home/zaysevkun/PycharmProjects/ReglamentsAPI(old)',
-                                   'pdfs/regulation.pdf')
+    regulation_id = request.GET.get('id')
+    regulation = Regulations.objects.get(pk=regulation_id)
+    regulation_full = regulation.combine()
+    font_path = os.path.join(STATIC_ROOT, 'pdf/fonts/times-new-roman.ttf')
+    html_head = """meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Моя первая страничка</title>
+<style type="text/css">
+@font-face {
+font-family: Arial;
+src: url(""" + font_path + """);
+}
+div { font-family: arial; }
+</style>"""
+    regulation_full = html_head + regulation_full
+    output_filename = os.path.join(STATIC_ROOT,
+                                   'pdf/regulation.pdf')
     result_file = open(output_filename, "w+b")
 
     pisa_status = pisa.CreatePDF(
-        regulation,
-        dest=result_file)
+        regulation_full.encode("UTF-8"),
+        dest=result_file, encoding='UTF-8')
+    result_file = io.open(output_filename, encoding="utf-8")
     result_file.close()
-    return HttpResponse('ok')
+    return HttpResponse(pisa_status.err)
 
 
 class CustomAuthToken(ObtainAuthToken):

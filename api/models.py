@@ -79,6 +79,16 @@ class Regulations(Statuses):
             return "Согласование"
         return "В работе"
 
+    def combine(self):
+        label = '<h3>' + self.label + '</h3>'
+        text1 = self.text1
+        text2 = self.text2
+        text3 = self.text3
+        text4 = self.text4
+        text5 = self.text5
+        regulation = label + text1 + text2 + text3 + text4 + text5
+        return regulation
+
 
 class Revisions(Statuses):
     REGULATIONS_PART_CHOICES = [
