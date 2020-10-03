@@ -13,5 +13,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('auth/', views.CustomAuthToken.as_view()),
-    # path('whoami/', views.whoami)
+    path('pdf/', views.html_to_pdf)
 ]

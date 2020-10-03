@@ -1,4 +1,8 @@
+import os
+import io
+
 from django.contrib.auth.models import Group, User
+from django.http import HttpResponse
 from django.shortcuts import render
 from rest_framework import permissions
 from rest_framework import viewsets
@@ -6,8 +10,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from xhtml2pdf import pisa
 
-from api.models import Department
+from ReglamentsAPI.settings import PROJECT_ROOT
+from api.models import Department, Regulations
 from api.serializers import UserInfoSerializer, GroupSerializer, DepartmentSerializer
 
 
@@ -16,6 +22,29 @@ from api.serializers import UserInfoSerializer, GroupSerializer, DepartmentSeria
 
 def index(request):
     return render(request, 'index.html')
+
+
+pisa.showLogging()
+
+
+def dumpErrors(pdf, showLog=True):
+
+    if pdf.err:
+        print(pdf.err)
+
+
+def html_to_pdf(request):
+    # regulation_id = request.GET.get('id')
+    # regulation = Regulations.objects.get(pk=regulation_id)
+    regulation = """Hello <b>World</b><br/>"""
+    output_filename = os.path.join('/home/zaysevkun/PycharmProjects/ReglamentsAPI(old)', 'pdfs/regulation.pdf')
+    result_file = open(output_filename, "w+b")
+
+    pisa_status = pisa.CreatePDF(
+        regulation,
+        dest=result_file)
+    result_file.close()
+    return HttpResponse('ok')
 
 
 class CustomAuthToken(ObtainAuthToken):
