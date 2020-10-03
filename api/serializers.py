@@ -218,7 +218,7 @@ class RegulationsSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     parts = PartsSerializer(read_only=True, source='*')
     departments_users = serializers.SerializerMethodField()
-    parts = PartsSerializer(read_only=True, source='*')
+    application_urls = serializers.SerializerMethodField()
 
     class Meta:
         model = Regulations
@@ -226,7 +226,7 @@ class RegulationsSerializer(serializers.ModelSerializer):
                   'created_at', 'updated_at', 'status', 'created_by', 'updated_by',
                   'approved', 'departments_users', 'parts', 'do_approve',
                   'text1', 'text2', 'text3', 'text4', 'text5', 'label',
-                  'approver_id')
+                  'approver_id', 'application_urls')
         extra_kwargs = {
             'version': {'read_only': True},
             'version_history_id': {'read_only': True},
@@ -244,6 +244,13 @@ class RegulationsSerializer(serializers.ModelSerializer):
     @staticmethod
     def get_departments_users(obj):
         return DepartmentsUsersSerializer(obj.departments.all(), many=True).data
+
+    def get_application_urls(self, obj):
+        request = self.context.get('request')
+        applications = obj.applications.all()
+        application_urls = [request.build_absolute_uri(application.app_file.url) for application in
+                            applications]
+        return application_urls
 
     def save(self, **kwargs):
         approver_id = self.validated_data.pop('approver_id', False)
@@ -299,7 +306,6 @@ class RegulationsSerializer(serializers.ModelSerializer):
 
 
 class ApplicationsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Applications
         fields = ('id', 'app_file', 'regulations')
