@@ -133,7 +133,7 @@ class Revisions(Statuses):
 
 class Applications(models.Model):
     app_file = models.FileField('файл приложения', max_length=5000)
-    regulations = models.ForeignKey(Regulations, verbose_name='Регламент')
+    regulations = models.ForeignKey(Regulations, verbose_name='Регламент', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Приложение'
