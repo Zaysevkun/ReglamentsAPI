@@ -22,12 +22,14 @@ class UserInfoSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='info.phone_number')
     patronymic_name = serializers.CharField(source='info.patronymic_name', required=False)
     is_deleted = serializers.BooleanField(source='info.is_deleted', required=False)
+    allow_send_info_emails = serializers.BooleanField(source='info.allow_send_info_emails',
+                                                      required=False)
 
     class Meta:
         model = User
         fields = ('id', 'username', 'password', 'email', 'phone_number', 'department',
                   'department_id', 'first_name', 'patronymic_name', 'last_name', 'is_deleted',
-                  'is_superuser')
+                  'is_superuser', 'allow_send_info_emails')
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
@@ -89,6 +91,25 @@ class RevisionsSerializer(serializers.ModelSerializer):
         fields = ('id', 'report', 'regulations_id', 'created_by',
                   'regulation_part', 'created_at', 'html_selection',
                   'is_marked_solved', 'secret_id', 'default_text')
+
+    def update(self, instance, validated_data):
+        is_marked_solved = validated_data.pop('is_marked_solved', None)
+        if is_marked_solved is not None:
+            subject = None
+            body = None
+            to = None
+            if is_marked_solved and not instance.is_marked_solved:
+                subject = "Ваша правка отмечена как решенная"
+                body = "Крутой текст со ссылками"
+                to = instance.created_by.email
+            if not is_marked_solved and instance.is_marked_solved:
+                subject = "Правка переведена обратно в статус не решенная"
+                body = "Очень крутой текст со ссылками"
+                to = instance.regulations.created_by.email
+            if subject and body and to:
+                email = EmailMessage(subject=subject, to=[to], body=body)
+                email.send()
+        return super().update(instance, validated_data)
 
     def create(self, validated_data):
         created_by = self.context['request'].user
