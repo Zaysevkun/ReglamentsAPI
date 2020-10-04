@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group, User
+from django.core.mail import EmailMessage
 from rest_framework import serializers
 
 from api.consts import TEXT1_LABEL, TEXT2_LABEL, TEXT3_LABEL, TEXT4_LABEL, TEXT5_LABEL
@@ -90,8 +91,19 @@ class RevisionsSerializer(serializers.ModelSerializer):
                   'is_marked_solved', 'secret_id')
 
     def create(self, validated_data):
-        validated_data['created_by'] = self.context['request'].user
-        return super().create(validated_data)
+        created_by = self.context['request'].user
+        validated_data['created_by'] = created_by
+        revisions = super().create(validated_data)
+
+        if created_by.info.allow_send_info_emails and created_by.email:
+            subject = "В созданный Вами регламент добавлена правка."
+            body = ('В созданный Вами регламент добавлена правка. Тут должна быть ссылка на правку,'
+                    'Кирилл, не забудь!!')
+            created_by = revisions.regulations.created_by
+            email = EmailMessage(subject, to=[created_by.email]
+                if created_by.info.allow_send_info_emails else [], body=body)
+            email.send()
+        return revisions
 
 
 class Text1Serializer(serializers.ModelSerializer):
@@ -269,8 +281,9 @@ class RegulationsSerializer(serializers.ModelSerializer):
         do_approve = self.validated_data.pop('do_approve', False)
         regulations = super().save(**kwargs)
         if do_approve:
-            regulations.departments.add(
-                *list(Department.objects.filter(is_regulator=True).values_list('id', flat=True)))
+            departments = Department.objects.filter(is_regulator=True)
+            send_mail_to_department_users(departments)
+            regulations.departments.add(*list(departments.values_list('id', flat=True)))
         if approver_id:
             regulations.approved.add(approver_id)
         return Regulations.objects.get(id=regulations.id)
