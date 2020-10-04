@@ -72,7 +72,7 @@ class DepartmentsUsersSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         regulations = Regulations.objects.get(id=self.context['regulations_id'])
-        user = obj.users.all().first()
+        user = obj.users.all().first().user
         if user.id in list(regulations.approved.all().values_list('id', flat=True)):
             return "Согласовано"
         if Revisions.objects.filter(regulations_id=regulations.id, created_by=user.id):
