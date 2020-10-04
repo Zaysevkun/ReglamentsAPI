@@ -94,6 +94,10 @@ class RegulationsViewSet(mixins.CreateModelMixin,
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = RegulationsSerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(is_deprecated=False)
+
     def retrieve(self, request, *args, **kwargs):
         regulation = self.get_object()
         version_history_id = regulation.version_history_id

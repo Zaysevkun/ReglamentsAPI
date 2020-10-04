@@ -61,6 +61,7 @@ class Regulations(Statuses):
                                    verbose_name='Кем обновлена', blank=True, null=True)
     approved = models.ManyToManyField(settings.AUTH_USER_MODEL, verbose_name='Одобрившие регламент',
                                       related_name='approved', blank=True)
+    is_deprecated = models.BooleanField('Устарел ли регламент?', default=False)
 
     class Meta:
         verbose_name = 'Регламент'

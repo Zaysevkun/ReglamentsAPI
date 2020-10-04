@@ -338,6 +338,7 @@ class RegulationsSerializer(serializers.ModelSerializer):
             updated_at = past_regulations.created_at
             past_regulations.created_at = instance.created_at
             past_regulations.updated_at = updated_at
+            past_regulations.is_deprecated = True
             past_regulations.save()
             regulations.identify_version(past_regulations.version_history_id,
                                          past_regulations.version)
