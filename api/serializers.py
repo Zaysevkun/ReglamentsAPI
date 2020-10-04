@@ -88,7 +88,7 @@ class RevisionsSerializer(serializers.ModelSerializer):
         model = Revisions
         fields = ('id', 'report', 'regulations_id', 'created_by',
                   'regulation_part', 'created_at', 'html_selection',
-                  'is_marked_solved', 'secret_id')
+                  'is_marked_solved', 'secret_id', 'default_text')
 
     def create(self, validated_data):
         created_by = self.context['request'].user

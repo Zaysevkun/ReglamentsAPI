@@ -119,12 +119,14 @@ class Revisions(Statuses):
     ]
     report = models.TextField('Сообщение по правке')
     secret_id = models.PositiveSmallIntegerField(null=True, blank=True)
+    default_text = models.TextField(null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, models.CASCADE,
                                    verbose_name='Кем создана', null=True)
     regulations = models.ForeignKey(Regulations, models.CASCADE, verbose_name='Регламент')
     regulation_part = models.CharField(max_length=32,
                                        choices=REGULATIONS_PART_CHOICES,
                                        default='text1')
+
     html_selection = models.TextField('Выделенный текст для правки', blank=True, null=True)
     is_marked_solved = models.BooleanField('Отмечен ли как решенный', default=False)
 
