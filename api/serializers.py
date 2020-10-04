@@ -91,39 +91,39 @@ class RevisionsSerializer(serializers.ModelSerializer):
         fields = ('id', 'report', 'regulations_id', 'created_by',
                   'regulation_part', 'created_at', 'html_selection',
                   'is_marked_solved', 'secret_id', 'default_text')
-
-    def update(self, instance, validated_data):
-        is_marked_solved = validated_data.pop('is_marked_solved', None)
-        if is_marked_solved is not None:
-            subject = None
-            body = None
-            to = None
-            if is_marked_solved and not instance.is_marked_solved:
-                subject = "Ваша правка отмечена как решенная"
-                body = "Крутой текст со ссылками"
-                to = instance.created_by.email
-            if not is_marked_solved and instance.is_marked_solved:
-                subject = "Правка переведена обратно в статус не решенная"
-                body = "Очень крутой текст со ссылками"
-                to = instance.regulations.created_by.email
-            if subject and body and to:
-                email = EmailMessage(subject=subject, to=[to], body=body)
-                email.send()
-        return super().update(instance, validated_data)
+    #
+    # def update(self, instance, validated_data):
+    #     is_marked_solved = validated_data.pop('is_marked_solved', None)
+    #     if is_marked_solved is not None:
+    #         subject = None
+    #         body = None
+    #         to = None
+    #         if is_marked_solved and not instance.is_marked_solved:
+    #             subject = "Ваша правка отмечена как решенная"
+    #             body = "Крутой текст со ссылками"
+    #             to = instance.created_by.email
+    #         if not is_marked_solved and instance.is_marked_solved:
+    #             subject = "Правка переведена обратно в статус не решенная"
+    #             body = "Очень крутой текст со ссылками"
+    #             to = instance.regulations.created_by.email
+    #         if subject and body and to:
+    #             email = EmailMessage(subject=subject, to=[to], body=body)
+    #             email.send()
+    #     return super().update(instance, validated_data)
 
     def create(self, validated_data):
         created_by = self.context['request'].user
         validated_data['created_by'] = created_by
         revisions = super().create(validated_data)
 
-        if created_by.info.allow_send_info_emails and created_by.email:
-            subject = "В созданный Вами регламент добавлена правка."
-            body = ('В созданный Вами регламент добавлена правка. Тут должна быть ссылка на правку,'
-                    'Кирилл, не забудь!!')
-            created_by = revisions.regulations.created_by
-            email = EmailMessage(subject, to=[created_by.email]
-                if created_by.info.allow_send_info_emails else [], body=body)
-            email.send()
+        # if created_by.info.allow_send_info_emails and created_by.email:
+        #     subject = "В созданный Вами регламент добавлена правка."
+        #     body = ('В созданный Вами регламент добавлена правка. Тут должна быть ссылка на правку,'
+        #             'Кирилл, не забудь!!')
+        #     created_by = revisions.regulations.created_by
+        #     email = EmailMessage(subject, to=[created_by.email]
+        #         if created_by.info.allow_send_info_emails else [], body=body)
+        #     email.send()
         return revisions
 
 
